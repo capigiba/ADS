@@ -24,7 +24,7 @@ def delete_record(rec_id: str, df: pd.DataFrame, csv_path: str):
 
 def render_manage_section():
     st.title("📋 Manage Records")
-    csv_path = "records.csv"
+    csv_path = "data/records.csv"
 
     # --- 1) Ensure we have a session_state key to tell list vs detail ---
     if "selected_record" not in st.session_state:

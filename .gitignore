@@ -27,3 +27,4 @@ folder_pdf/
 # Environment variables and secrets
 .env
 
+models/

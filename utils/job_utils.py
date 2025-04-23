@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-def load_active_job_titles(jobs_csv_path: str = "jobs.csv") -> list[str]:
+def load_active_job_titles(jobs_csv_path: str = "data/jobs.csv") -> list[str]:
     """
     Read jobs.csv and return a list of job_title values
     where status != "deleted".

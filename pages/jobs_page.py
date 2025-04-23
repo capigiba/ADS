@@ -2,7 +2,7 @@ import os, datetime, uuid
 import pandas as pd
 import streamlit as st
 
-CSV_PATH   = "jobs.csv"
+CSV_PATH   = "data/jobs.csv"
 FIELDNAMES = ["id", "job_title", "created_at", "updated_at", "status"]
 
 def delete_record(rec_id: str, df: pd.DataFrame, csv_path: str):
