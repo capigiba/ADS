@@ -3,6 +3,7 @@ import pandas as pd, streamlit as st
 from utils.file_utils import make_filename
 from utils.job_utils import load_active_job_titles
 from services.scanner import scan_record_score
+from utils.render_gauge import render_ats_gauge
 from pathlib import Path
 
 def render_upload_section():
@@ -96,12 +97,14 @@ def render_upload_section():
     with right:
         if st.session_state.submitted:
             st.subheader("ATS Score")
-            score, result_file = scan_record_score(
-                filename=st.session_state.filename,
-                job_title=st.session_state.job_title,
-                job_description=st.session_state.job_description
-            )
-            st.metric(label="Score", value=f"{score:.2f}")
+            with st.spinner("🔄 Scanning CV, please wait…"):
+                score, result_file = scan_record_score(
+                    filename=st.session_state.filename,
+                    job_title=st.session_state.job_title,
+                    job_description=st.session_state.job_description
+                )
+            st.success("✅ Scan complete!")
+            render_ats_gauge(score)
 
             # download button for full results CSV
             result_path = Path("scan_results") / result_file

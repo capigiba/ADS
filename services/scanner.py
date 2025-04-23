@@ -43,12 +43,8 @@ def scan_record_score(
     scan_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    # count existing for this job_title so we can number this one
-    existing = list(scan_dir.glob(f"{job_title}_*.csv"))
-    run_idx = len(existing) + 1
-
     safe_title = job_title.replace(" ", "_")
-    result_filename = f"[{safe_title}]_{timestamp}_{run_idx}.csv"
+    result_filename = f"[{safe_title}]_{timestamp}_{len(pdf_list)}.csv"
     result_path = scan_dir / result_filename
 
     # -- save full results dict to CSV --
