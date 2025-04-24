@@ -1,7 +1,6 @@
 import streamlit as st
 from pages.upload_page import render_upload_section
 from pages.manage_page import render_manage_section
-from pages.jobs_page   import render_jobs_page
 from pages.scan_results_page import render_scan_results_page
 from pages.skills_page import render_skills_page
 
@@ -10,7 +9,7 @@ st.set_page_config(page_title="ADS", layout="wide")
 # 1) Use one key for your sidebar…
 page = st.sidebar.radio(
     "📑 Navigate to",
-    ["Upload & Config", "Manage Records", "Jobs", "Scan Results", "Skills"],
+    ["Upload & Config", "Manage Records", "Scan Results", "Skills"],
     key="current_page",
     on_change=lambda: _clear_except("current_page")
 )
@@ -26,8 +25,6 @@ if st.session_state.current_page == "Upload & Config":
     render_upload_section()
 elif st.session_state.current_page == "Manage Records":
     render_manage_section()
-elif st.session_state.current_page == "Jobs":
-    render_jobs_page()
 elif st.session_state.current_page == "Scan Results":
     render_scan_results_page()
 elif st.session_state.current_page == "Skills":  
