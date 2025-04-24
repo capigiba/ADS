@@ -25,6 +25,8 @@ def render_upload_section():
         st.session_state.weight1 = USER_SKILL_WEIGHT
         st.session_state.weight2 = USER_EXPERIENCE_WEIGHT
         st.session_state.custom_weights = False
+    if "results" not in st.session_state:
+        st.session_state.results = None
 
     left, right = st.columns(2)
     with left:
@@ -113,8 +115,8 @@ def render_upload_section():
                     "name pdf",
                     "job_title",
                     "job_description",
-                    "weight1",
-                    "weight2",
+                    "skill",
+                    "experience",
                     "created_at",
                     "updated_at",
                     "status",
@@ -147,6 +149,17 @@ def render_upload_section():
                 st.session_state.custom_weights = custom_weights
                 st.session_state.weight1 = weight1
                 st.session_state.weight2 = weight2
+
+                cs, ks, ms, ai = evaluate_resume(
+                    pdf_path=Path("folder_pdf") / st.session_state.filename,
+                    job_description=st.session_state.job_description
+                )
+                st.session_state.results = {
+                    "cs": cs,
+                    "ks": ks,
+                    "ms": ms,
+                    "ai": ai,
+                }
 
                 st.success("✅ PDF uploaded and record saved.")
 
@@ -186,23 +199,19 @@ def render_upload_section():
             else:
                 st.warning(f"Result file not found: {result_path}")
 
-    cs, ks, ms, ai = evaluate_resume(
-        pdf_path=Path("folder_pdf") / st.session_state.filename,
-        job_description=st.session_state.job_description
-    )
+    if st.session_state.results is not None:
+        st.markdown("---")
+        st.subheader("Current Skills")
+        st.write(st.session_state.results["cs"])
 
-    st.markdown("---")
-    st.subheader("Current Skills")
-    st.write(cs)
+        st.subheader("Key Strengths")
+        st.write(st.session_state.results["ks"])
 
-    st.subheader("Key Strengths")
-    st.write(ks)
+        st.subheader("Missing Skills")
+        st.write(st.session_state.results["ms"])
 
-    st.subheader("Missing Skills")
-    st.write(ms)
-
-    st.subheader("Areas for Improvement")
-    st.write(ai)
+        st.subheader("Areas for Improvement")
+        st.write(st.session_state.results["ai"])
 
 if __name__ == "__main__":
     render_upload_section()
