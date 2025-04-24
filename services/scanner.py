@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Union, List, Dict, Tuple
 from datetime import datetime
-from utils.cv_scanner import run_cv_scanner
+from internal.cv_scanner import run_cv_scanner
 
 def scan_record_score(
     filename: str,

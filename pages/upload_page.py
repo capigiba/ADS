@@ -2,9 +2,11 @@ import os, uuid, datetime, csv
 import pandas as pd, streamlit as st
 from utils.file_utils import make_filename
 from utils.job_utils import load_active_job_titles
+from utils.skill_utils import load_job_titles
 from services.scanner import scan_record_score
-from utils.render_gauge import render_ats_gauge
+from utils.gauge_utils import render_ats_gauge
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 def render_upload_section():
     if "submitted" not in st.session_state:
@@ -18,11 +20,27 @@ def render_upload_section():
         st.subheader("Upload PDF")
         pdf_file = st.file_uploader("Choose a PDF file", type=["pdf"])
         st.subheader("Configuration")
-        job_titles = load_active_job_titles()
-        if not job_titles:
+
+        job_tuples: List[Tuple[int, str]] = load_job_titles()
+
+        if not job_tuples:
             st.warning("No active jobs available. Please create one on the Jobs page first.")
             return
-        job_title = st.selectbox("Job Title", job_titles)
+
+        # 2) Build a dict:  display_label -> actual_title
+        label_to_title = {
+            f"{title} #{id}": title
+            for id, title in job_tuples
+        }
+
+        # 3) Use the labels as the selectbox options
+        selected_label = st.selectbox(
+            "Job Title",
+            options=list(label_to_title.keys())
+        )
+
+        # 4) Grab your pure title
+        job_title = label_to_title[selected_label]
         job_description = st.text_area(
             "Job Description",
             placeholder="Enter a detailed job description here…",
