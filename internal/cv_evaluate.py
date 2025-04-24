@@ -9,11 +9,15 @@ import re
 from pathlib import Path
 from typing import Union, Tuple
 import pymupdf
+from dotenv import load_dotenv
 
 # Trước khi in ra, thay đổi thiết lập mã hóa đầu ra của Python
 sys.stdout.reconfigure(encoding='utf-8')
 
+load_dotenv("env.sh")
+
 API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}'
 
 def extracted_with_Gemini(resume_text, job_description):
