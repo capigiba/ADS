@@ -186,23 +186,23 @@ def render_upload_section():
             else:
                 st.warning(f"Result file not found: {result_path}")
 
-            cs, ks, ms, ai = evaluate_resume(
-                pdf_path=Path("folder_pdf") / st.session_state.filename,
-                job_description=st.session_state.job_description
-            )
+    cs, ks, ms, ai = evaluate_resume(
+        pdf_path=Path("folder_pdf") / st.session_state.filename,
+        job_description=st.session_state.job_description
+    )
 
-            st.markdown("---")
-            st.subheader("Current Skills")
-            st.write(cs)
+    st.markdown("---")
+    st.subheader("Current Skills")
+    st.write(cs)
 
-            st.subheader("Key Strengths")
-            st.write(ks)
+    st.subheader("Key Strengths")
+    st.write(ks)
 
-            st.subheader("Missing Skills")
-            st.write(ms)
+    st.subheader("Missing Skills")
+    st.write(ms)
 
-            st.subheader("Areas for Improvement")
-            st.write(ai)
+    st.subheader("Areas for Improvement")
+    st.write(ai)
 
 if __name__ == "__main__":
     render_upload_section()

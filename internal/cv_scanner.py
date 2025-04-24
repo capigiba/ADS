@@ -510,10 +510,15 @@ def run_cv_scanner(
     Returns: { pdf_path_str: details_dict } sorted by details['score'] desc.
     """
     # override the globals with what was passed in global USER_SKILL_WEIGHT, USER_EXPERIENCE_WEIGHT
+    global USER_SKILL_WEIGHT, USER_EXPERIENCE_WEIGHT
+    global TARGET_MONTHS_EXPERIENCE
+
     if user_skill_weight is not None:
         USER_SKILL_WEIGHT = user_skill_weight
     if user_experience_weight is not None:
         USER_EXPERIENCE_WEIGHT = user_experience_weight
+        # remember to recompute any targets that depend on it:
+        TARGET_MONTHS_EXPERIENCE = _cfg["target_months_base"] * USER_EXPERIENCE_WEIGHT
     # 1) load skills
     skills_map = load_skills()
 

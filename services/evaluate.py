@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Union, Tuple
 import pymupdf
-from internal.gemini_api import analyze_resume
+from internal.cv_evaluate import analyze_resume
 
 def extract_text_from_pdf(pdf_path: Union[str, Path]) -> str:
     try:
