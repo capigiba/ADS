@@ -16,7 +16,7 @@ import torch
 import dateparser
 from collections import defaultdict
 import yaml
-import fitz
+from utils.skill_utils import load_skills
 
 _config_path = Path(__file__).parent.parent / "config.yaml"
 _cfg = yaml.safe_load(_config_path.read_text())
@@ -51,49 +51,49 @@ FUZZY_SKILL_MATCH_THRESHOLD  = _cfg["fuzzy_skill_match_threshold"]
 def normalize_text(txt: str) -> str:
     return txt.strip().lower()
 
-def load_skills(skills_file_path: Path) -> Dict[str, List[str]]:
-    job_skills_map_sets: Dict[str, Set[str]] = defaultdict(set)
-    try:
-        with open(skills_file_path, 'r', encoding='utf-8') as f:
-            csv_content = f.read()
-            reader = csv.reader(io.StringIO(csv_content), delimiter='|', quotechar='"')
+# def load_skills(skills_file_path: Path) -> Dict[str, List[str]]:
+#     job_skills_map_sets: Dict[str, Set[str]] = defaultdict(set)
+#     try:
+#         with open(skills_file_path, 'r', encoding='utf-8') as f:
+#             csv_content = f.read()
+#             reader = csv.reader(io.StringIO(csv_content), delimiter='|', quotechar='"')
 
-            header = [normalize_text(h) for h in next(reader)]
-            try:
-                title_idx = header.index('job_title')
-                skills_idx = header.index('skills_necessary')
-            except ValueError as e:
-                print(f"Error: Missing required columns ('job_title', 'skills_necessary') in skills file header: {header}", file=sys.stderr)
-                raise ValueError(f"Invalid skills file header: {e}") from e
+#             header = [normalize_text(h) for h in next(reader)]
+#             try:
+#                 title_idx = header.index('job_title')
+#                 skills_idx = header.index('skills_necessary')
+#             except ValueError as e:
+#                 print(f"Error: Missing required columns ('job_title', 'skills_necessary') in skills file header: {header}", file=sys.stderr)
+#                 raise ValueError(f"Invalid skills file header: {e}") from e
 
-            for i, row in enumerate(reader):
-                if len(row) <= max(title_idx, skills_idx):
-                    continue
+#             for i, row in enumerate(reader):
+#                 if len(row) <= max(title_idx, skills_idx):
+#                     continue
 
-                job_title = normalize_text(row[title_idx])
-                skills_str = row[skills_idx].strip()
+#                 job_title = normalize_text(row[title_idx])
+#                 skills_str = row[skills_idx].strip()
 
-                if job_title:
-                    if skills_str:
-                        skills = {normalize_text(skill) for skill in skills_str.split(',') if skill.strip()}
-                        job_skills_map_sets[job_title].update(skills)
-                    else:
-                        job_skills_map_sets[job_title]
+#                 if job_title:
+#                     if skills_str:
+#                         skills = {normalize_text(skill) for skill in skills_str.split(',') if skill.strip()}
+#                         job_skills_map_sets[job_title].update(skills)
+#                     else:
+#                         job_skills_map_sets[job_title]
 
-        job_skills_map_lists: Dict[str, List[str]] = {
-            title: sorted(list(skills)) for title, skills in job_skills_map_sets.items()
-        }
-        if not job_skills_map_lists:
-            print(f"Warning: No skills loaded from '{skills_file_path}'. Map is empty.", file=sys.stderr)
+#         job_skills_map_lists: Dict[str, List[str]] = {
+#             title: sorted(list(skills)) for title, skills in job_skills_map_sets.items()
+#         }
+#         if not job_skills_map_lists:
+#             print(f"Warning: No skills loaded from '{skills_file_path}'. Map is empty.", file=sys.stderr)
 
-        return job_skills_map_lists
+#         return job_skills_map_lists
 
-    except FileNotFoundError:
-        print(f"Error: Skills file not found at '{skills_file_path}'", file=sys.stderr)
-        raise
-    except Exception as e:
-        print(f"Error loading skills file '{skills_file_path}': {e}", file=sys.stderr)
-        raise
+#     except FileNotFoundError:
+#         print(f"Error: Skills file not found at '{skills_file_path}'", file=sys.stderr)
+#         raise
+#     except Exception as e:
+#         print(f"Error loading skills file '{skills_file_path}': {e}", file=sys.stderr)
+#         raise
 
 def load_requirement(req_file_path: Path) -> str:
     try:
@@ -539,10 +539,12 @@ def run_cv_scanner(
     skills_file_path: Union[str, Path],
     job_description: str,
     pdf_folder: Union[str, Path],
+    user_skill_weight: Optional[float] = None,
+    user_experience_weight: Optional[float] = None,
     pdf_list: Optional[List[str]] = None,
     job_title: Optional[str] = None,
     model_id: str = "BAAI/bge-large-en-v1.5",
-    spacy_model: str = "en_core_web_sm"
+    spacy_model: str = "en_core_web_sm",
 ) -> Dict[str, Dict]:
     """
     1) Loads skills map from a pipe-delimited CSV.
@@ -551,8 +553,16 @@ def run_cv_scanner(
     4) Scans only the PDFs you care about (either all in pdf_folder or just those in pdf_list).
     Returns: { pdf_path_str: details_dict } sorted by details['score'] desc.
     """
+    # override the globals with what was passed in global USER_SKILL_WEIGHT, USER_EXPERIENCE_WEIGHT
+    if user_skill_weight is not None:
+        USER_SKILL_WEIGHT = user_skill_weight
+    if user_experience_weight is not None:
+        USER_EXPERIENCE_WEIGHT = user_experience_weight
     # 1) load skills
-    skills_map = load_skills(Path(skills_file_path))
+    skills_map = load_skills()
+
+    print(f"[LOG] USER_SKILL_WEIGHT: {USER_SKILL_WEIGHT}")
+    print(f"[LOG] USER_EXPERIENCE_WEIGHT: {USER_EXPERIENCE_WEIGHT}")
 
     # 2) validate job_description
     if not job_description or not job_description.strip():

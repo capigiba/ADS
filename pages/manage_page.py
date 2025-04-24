@@ -84,7 +84,7 @@ def render_manage_section():
             st.markdown(f"**Job Title:** {row['job_title']}")
             st.markdown("**Description:**\n\n" + row["job_description"])
             st.markdown(f"**PDF Name:** {row['name pdf']}")
-            st.markdown(f"**W1:** {row['weight1']} **W2:** {row['weight2']}")
+            st.markdown(f"**Skill:** {row['skill']} **Experience:** {row['experience']}")
             st.markdown(f"**Created:** {row['created_at']}")
             st.markdown(f"**Updated:** {row['updated_at']}")
             st.markdown(f"**Status:** {row['status']}")

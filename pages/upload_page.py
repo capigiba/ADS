@@ -5,7 +5,14 @@ from utils.skill_utils import load_job_titles
 from services.scanner import scan_record_score
 from utils.gauge_utils import render_ats_gauge
 from pathlib import Path
+import yaml
 from typing import Dict, List, Tuple
+
+_config_path = Path(__file__).parent.parent / "config.yaml"
+_cfg = yaml.safe_load(_config_path.read_text())
+
+USER_SKILL_WEIGHT            = _cfg["user_skill_weight"]
+USER_EXPERIENCE_WEIGHT       = _cfg["user_experience_weight"]
 
 def render_upload_section():
     if "submitted" not in st.session_state:
@@ -13,6 +20,10 @@ def render_upload_section():
         st.session_state.filename = ""
         st.session_state.job_title = ""
         st.session_state.job_description = ""
+        st.session_state.score_all = False
+        st.session_state.weight1 = USER_SKILL_WEIGHT
+        st.session_state.weight2 = USER_EXPERIENCE_WEIGHT
+        st.session_state.custom_weights = False
 
     left, right = st.columns(2)
     with left:
@@ -45,8 +56,24 @@ def render_upload_section():
             placeholder="Enter a detailed job description here…",
             height=120,
         )
-        weight1 = st.number_input("Weight 1", min_value=0.0, max_value=1.0, step=0.1, value=0.5)
-        weight2 = st.number_input("Weight 2", min_value=0.0, max_value=1.0, step=0.1, value=0.5)
+        custom_weights = st.checkbox("Enable custom weights", value=False)
+        if custom_weights:
+            weight1 = st.number_input(
+                "Skill weight",
+                min_value=0.0, max_value=1.0, step=0.1,
+                value=USER_SKILL_WEIGHT
+            )
+            weight2 = st.number_input(
+                "Experience weight",
+                min_value=0.0, max_value=1.0, step=0.1,
+                value=USER_EXPERIENCE_WEIGHT
+            )
+        else:
+            weight1 = USER_SKILL_WEIGHT
+            weight2 = USER_EXPERIENCE_WEIGHT
+            st.write(f"Using default weights → Skill: **{weight1}**, Experience: **{weight2}**")
+        # weight1 = st.number_input("Skill", min_value=0.0, max_value=1.0, step=0.1, value=0.5)
+        # weight2 = st.number_input("Experience", min_value=0.0, max_value=1.0, step=0.1, value=0.5)
 
         # check the sum
         total = weight1 + weight2
@@ -56,6 +83,13 @@ def render_upload_section():
             st.warning("ℹ️ The weights sum to less than 1 (must equal 1).")
         else:
             st.success("✅ Weights sum to 1")
+
+        scan_mode = st.radio(
+            "Scan mode",
+            ("Only this PDF", "All PDFs for this job title")
+        )
+        score_all = (scan_mode == "All PDFs for this job title")
+
         submit = st.button("Submit")
         if submit:
             if pdf_file is None:
@@ -108,6 +142,10 @@ def render_upload_section():
                 st.session_state.filename = filename
                 st.session_state.job_title = job_title
                 st.session_state.job_description = job_description
+                st.session_state.score_all = score_all
+                st.session_state.custom_weights = custom_weights
+                st.session_state.weight1 = weight1
+                st.session_state.weight2 = weight2
 
                 st.success("✅ PDF uploaded and record saved.")
 
@@ -115,11 +153,22 @@ def render_upload_section():
         if st.session_state.submitted:
             st.subheader("ATS Score")
             with st.spinner("🔄 Scanning CV, please wait…"):
-                score, result_file = scan_record_score(
-                    filename=st.session_state.filename,
-                    job_title=st.session_state.job_title,
-                    job_description=st.session_state.job_description
-                )
+                if st.session_state.custom_weights:
+                    score, result_file = scan_record_score(
+                        filename=st.session_state.filename,
+                        job_title=st.session_state.job_title,
+                        job_description=st.session_state.job_description,
+                        score_all=st.session_state.score_all,
+                        user_skill_weight=st.session_state.weight1,
+                        user_experience_weight=st.session_state.weight2,
+                    )
+                else:
+                    score, result_file = scan_record_score(
+                        filename=st.session_state.filename,
+                        job_title=st.session_state.job_title,
+                        job_description=st.session_state.job_description,
+                        score_all=st.session_state.score_all
+                    )
             st.success("✅ Scan complete!")
             render_ats_gauge(score)
 

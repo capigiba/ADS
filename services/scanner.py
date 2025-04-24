@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, Optional
 from datetime import datetime
 from internal.cv_scanner import run_cv_scanner
 
@@ -8,9 +8,12 @@ def scan_record_score(
     filename: str,
     job_title: str,
     job_description: str,
+    score_all: bool,
     pdf_folder: Union[str, Path] = "folder_pdf",
     records_csv_path: Union[str, Path] = "data/records.csv",
     skills_file_path: Union[str, Path] = "data/skills.csv",
+    user_skill_weight: Optional[float] = None,
+    user_experience_weight: Optional[float] = None,
 ) -> Tuple[float, str]:
     """
     1) Reads `records_csv_path` (CSV with columns:
@@ -27,16 +30,37 @@ def scan_record_score(
     if df_filtered.empty:
         raise ValueError(f"No records found for job_title '{job_title}' in '{records_csv_path}'")
 
-    pdf_list: List[str] = df_filtered["name pdf"].dropna().tolist()
+    # -- choose pdf list based on score_all flag --
+    if score_all:
+        pdf_list: List[str] = df_filtered["name pdf"].dropna().tolist()
+    else:
+        # only scan the single target file
+        all_names = df_filtered["name pdf"].dropna().tolist()
+        if filename not in all_names:
+            raise FileNotFoundError(
+                f"Filename '{filename}' not found among records for job_title '{job_title}'"
+            )
+        pdf_list = [filename]
 
     # -- run the CV scanner on only those PDFs --
-    results: Dict[str, Dict] = run_cv_scanner(
-        skills_file_path=skills_file_path,
-        job_description=job_description,
-        pdf_folder=pdf_folder,
-        pdf_list=pdf_list,
-        job_title=job_title
-    )
+    if user_skill_weight is not None and user_experience_weight is not None:
+        results: Dict[str, Dict] = run_cv_scanner(
+            skills_file_path=skills_file_path,
+            job_description=job_description,
+            pdf_folder=pdf_folder,
+            pdf_list=pdf_list,
+            user_skill_weight=user_skill_weight,
+            user_experience_weight=user_experience_weight,
+            job_title=job_title
+        )
+    else:
+        results: Dict[str, Dict] = run_cv_scanner(
+            skills_file_path=skills_file_path,
+            job_description=job_description,
+            pdf_folder=pdf_folder,
+            pdf_list=pdf_list,
+            job_title=job_title
+        )
 
     # -- prepare scan_results folder and filename --
     scan_dir = Path("scan_results")
