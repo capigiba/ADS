@@ -11,7 +11,7 @@ def scan_record_score(
     score_all: bool,
     pdf_folder: Union[str, Path] = "folder_pdf",
     records_csv_path: Union[str, Path] = "data/records.csv",
-    skills_file_path: Union[str, Path] = "data/skills.csv",
+    skills_file_path: Union[str, Path] = "data/list_skills.csv",
     user_skill_weight: Optional[float] = None,
     user_experience_weight: Optional[float] = None,
 ) -> Tuple[float, str]:

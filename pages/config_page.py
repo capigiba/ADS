@@ -36,6 +36,15 @@ def render_config():
         value=config.get('user_experience_weight', 0.2), step=0.1
     )
 
+    # Validate that the two weights sum to exactly 1
+    total_weights = config['user_skill_weight'] + config['user_experience_weight']
+    if total_weights > 1:
+        st.error("⚠️ The skill and experience weights sum to more than 1 (currently {:.2f}).".format(total_weights))
+    elif total_weights < 1:
+        st.warning("ℹ️ The skill and experience weights sum to less than 1 (currently {:.2f}).".format(total_weights))
+    else:
+        st.success("✅ Skill and experience weights sum to 1.")
+
     # Targets
     st.subheader("Targets")
     config['target_jd_similarity'] = st.slider(
@@ -53,7 +62,7 @@ def render_config():
     )
     config['target_gpa'] = st.number_input(
         "Target GPA", min_value=0.0, max_value=4.0,
-        value=config.get('target_gpa', 3.2), step=0.01
+        value=config.get('target_gpa', 3.2), step=0.1
     )
 
     # Score Breakdown
@@ -89,15 +98,19 @@ def render_config():
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Save Configuration"):
-            save_config(CONFIG_PATH, config)
-            st.success("Configuration saved to config.yaml")
+            # Only save if weights sum to 1
+            if total_weights == 1:
+                save_config(CONFIG_PATH, config)
+                st.success("Configuration saved to config.yaml")
+            else:
+                st.error("Cannot save: skill and experience weights must sum to 1.")
     with col2:
         if st.button("Reset to Default"):
             # Load defaults from backup YAML
             default = load_config(BACKUP_PATH)
             save_config(CONFIG_PATH, default)
             st.success("Configuration reset to default settings")
-            st.rerun()  # reload page to reflect defaults
+            st.experimental_rerun()  # reload page to reflect defaults
 
 if __name__ == "__main__":
     render_config()
