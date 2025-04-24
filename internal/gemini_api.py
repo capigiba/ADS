@@ -12,7 +12,7 @@ import re
 # Trước khi in ra, thay đổi thiết lập mã hóa đầu ra của Python
 sys.stdout.reconfigure(encoding='utf-8')
 
-API_KEY = 'AIzaSyDmOjc8Ja27ChkAIni6zEHbA6GFBX3OuTQ'
+API_KEY = ''
 url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}'
 
 def extracted_with_Gemini(resume_text, job_description):
