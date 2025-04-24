@@ -1,3 +1,16 @@
 job_title,skills_necessary,status
-Web Developer (Frontend),"HTML, CSS, JavaScript, Frameworks (React/Angular/Vue)",active
-Web Developer (Backend),"Server-side Languages (Node.js/Python/Ruby/Java/PHP), Databases (SQL/NoSQL), APIs (REST/GraphQL)",active
+Software Engineer,"Programming (Python/Java/C++/etc.), Data Structures, Algorithms, Git, Problem Solving, Debugging, Agile Methodologies",active
+Web Developer (Frontend),"HTML, CSS, JavaScript, Frameworks (React/Angular/Vue), Responsive Design, UI/UX Principles, Git, Browser Dev Tools",active
+Web Developer (Backend),"Server-side Languages (Node.js/Python/Ruby/Java/PHP), Databases (SQL/NoSQL), APIs (REST/GraphQL), Server Management, Security Principles, Git",active
+Full Stack Developer,"Frontend Skills, Backend Skills, Databases, DevOps Basics, Problem Solving, Version Control (Git)",active
+Data Scientist,"Python/R, Machine Learning, Statistics, Data Visualization (Tableau/Power BI), SQL, Big Data Technologies (Spark/Hadoop), Communication",active
+Data Analyst,"SQL, Excel, Data Visualization Tools (Tableau/Power BI), Python/R (basic), Statistical Analysis, Communication, Business Acumen",active
+Database Administrator (DBA),"SQL, Database Management Systems (Oracle/MySQL/PostgreSQL/SQL Server), Backup & Recovery, Performance Tuning, Security, Scripting",active
+Network Engineer,"Networking Protocols (TCP/IP, BGP, OSPF), Cisco/Juniper Configuration, Firewalls, VPNs, Network Monitoring Tools, Troubleshooting",active
+Systems Administrator,"Operating Systems (Linux/Windows Server), Scripting (Bash/PowerShell), Virtualization (VMware/Hyper-V), Cloud Platforms (AWS/Azure/GCP basics), Networking Basics, Security",active
+Cloud Engineer,"Cloud Platforms (AWS/Azure/GCP), Infrastructure as Code (Terraform/CloudFormation), Containers (Docker/Kubernetes), CI/CD Pipelines, Networking, Security",active
+DevOps Engineer,"CI/CD Tools (Jenkins/GitLab CI/GitHub Actions), Containers (Docker/Kubernetes), Cloud Platforms, Scripting, Automation, Monitoring Tools, Linux/Unix",active
+Cybersecurity Analyst,"Security Principles, Network Security, SIEM Tools, Vulnerability Assessment, Penetration Testing Basics, Incident Response, Compliance Frameworks",active
+IT Support Specialist,"Hardware/Software Troubleshooting, Operating Systems (Windows/macOS), Networking Basics, Active Directory, Customer Service, Problem Solving",active
+Project Manager (IT),"Project Management Methodologies (Agile/Scrum/Waterfall), Planning, Risk Management, Budgeting, Communication, Leadership, Stakeholder Management",active
+QA Engineer/Tester,"Testing Methodologies, Test Planning, Test Case Design, Automation Tools (Selenium/Cypress), Bug Tracking Systems (Jira), SQL Basics, Attention to Detail",active
