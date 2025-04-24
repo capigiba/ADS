@@ -83,3 +83,6 @@ def render_scan_results_page():
             if "scores" in row:
                 st.markdown("**Scores Breakdown:**")
                 st.json(row["scores"])
+
+if __name__ == "__main__":
+    render_scan_results_page()

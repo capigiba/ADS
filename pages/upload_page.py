@@ -185,3 +185,5 @@ def render_upload_section():
             else:
                 st.warning(f"Result file not found: {result_path}")
 
+if __name__ == "__main__":
+    render_upload_section()

@@ -95,3 +95,6 @@ def render_manage_section():
                     key=f"del_{rec_id}",
                     on_click=lambda rec=rec_id: delete_record(rec, df, csv_path)
                 )
+
+if __name__ == "__main__":
+    render_manage_section()
