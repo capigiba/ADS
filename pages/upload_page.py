@@ -1,7 +1,6 @@
 import os, uuid, datetime, csv
 import pandas as pd, streamlit as st
 from utils.file_utils import make_filename
-from utils.job_utils import load_active_job_titles
 from utils.skill_utils import load_job_titles
 from services.scanner import scan_record_score
 from utils.gauge_utils import render_ats_gauge
