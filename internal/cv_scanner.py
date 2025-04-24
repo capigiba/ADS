@@ -51,50 +51,6 @@ FUZZY_SKILL_MATCH_THRESHOLD  = _cfg["fuzzy_skill_match_threshold"]
 def normalize_text(txt: str) -> str:
     return txt.strip().lower()
 
-# def load_skills(skills_file_path: Path) -> Dict[str, List[str]]:
-#     job_skills_map_sets: Dict[str, Set[str]] = defaultdict(set)
-#     try:
-#         with open(skills_file_path, 'r', encoding='utf-8') as f:
-#             csv_content = f.read()
-#             reader = csv.reader(io.StringIO(csv_content), delimiter='|', quotechar='"')
-
-#             header = [normalize_text(h) for h in next(reader)]
-#             try:
-#                 title_idx = header.index('job_title')
-#                 skills_idx = header.index('skills_necessary')
-#             except ValueError as e:
-#                 print(f"Error: Missing required columns ('job_title', 'skills_necessary') in skills file header: {header}", file=sys.stderr)
-#                 raise ValueError(f"Invalid skills file header: {e}") from e
-
-#             for i, row in enumerate(reader):
-#                 if len(row) <= max(title_idx, skills_idx):
-#                     continue
-
-#                 job_title = normalize_text(row[title_idx])
-#                 skills_str = row[skills_idx].strip()
-
-#                 if job_title:
-#                     if skills_str:
-#                         skills = {normalize_text(skill) for skill in skills_str.split(',') if skill.strip()}
-#                         job_skills_map_sets[job_title].update(skills)
-#                     else:
-#                         job_skills_map_sets[job_title]
-
-#         job_skills_map_lists: Dict[str, List[str]] = {
-#             title: sorted(list(skills)) for title, skills in job_skills_map_sets.items()
-#         }
-#         if not job_skills_map_lists:
-#             print(f"Warning: No skills loaded from '{skills_file_path}'. Map is empty.", file=sys.stderr)
-
-#         return job_skills_map_lists
-
-#     except FileNotFoundError:
-#         print(f"Error: Skills file not found at '{skills_file_path}'", file=sys.stderr)
-#         raise
-#     except Exception as e:
-#         print(f"Error loading skills file '{skills_file_path}': {e}", file=sys.stderr)
-#         raise
-
 def load_requirement(req_file_path: Path) -> str:
     try:
         with open(req_file_path, 'r', encoding='utf-8') as f:
