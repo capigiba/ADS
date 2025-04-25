@@ -14,13 +14,7 @@ from dotenv import load_dotenv
 # Trước khi in ra, thay đổi thiết lập mã hóa đầu ra của Python
 sys.stdout.reconfigure(encoding='utf-8')
 
-load_dotenv("env.sh")
-
-API_KEY = os.getenv("GEMINI_API_KEY", "")
-
-url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}'
-
-def extracted_with_Gemini(resume_text, job_description):
+def extracted_with_Gemini(resume_text: str, job_description: str, api_key: str):
     prompt = f"""
         You are an expert resume analyst with deep knowledge of industry standards, job requirements, and hiring practices across various fields. Your task is to provide a comprehensive, detailed analysis of the resume provided.
 
@@ -48,6 +42,12 @@ def extracted_with_Gemini(resume_text, job_description):
 
         {resume_text}
         """
+    
+    url = (
+        "https://generativelanguage.googleapis.com/"
+        "v1beta/models/gemini-1.5-flash-latest:generateContent"
+        f"?key={api_key}"
+    )
 
     payload = {
         "contents": [
@@ -113,7 +113,7 @@ def extract_text_from_pdf(pdf_path: Union[str, Path]) -> str:
         return ""
 
 def analyze_resume(
-    cv_text: str, job_description: str
+    cv_text: str, job_description: str, api_key: str
 ) -> Tuple[str, str, str, str]:
     """
     High-level helper: read PDF, analyze with Gemini, and return structured results.
@@ -129,5 +129,5 @@ def analyze_resume(
         - missing_skills
         - areas_for_improvement
     """
-    return extracted_with_Gemini(cv_text, job_description)
+    return extracted_with_Gemini(cv_text, job_description, api_key)
 # current_skills, key_strengths, missing_skills, areas_for_improvement

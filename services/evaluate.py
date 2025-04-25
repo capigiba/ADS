@@ -31,12 +31,11 @@ def extract_text_from_pdf(pdf_path: Union[str, Path]) -> str:
 
 
 def evaluate_resume(
-    pdf_path: Union[str, Path], 
-    job_description: str
+     pdf_path: Union[str, Path], job_description: str, api_key: str
 ) -> Tuple[str, str, str, str]:
     cv_text = extract_text_from_pdf(pdf_path)
 
-    current_skills, key_strengths, missing_skills, areas_for_improvement = analyze_resume(cv_text, job_description)
+    current_skills, key_strengths, missing_skills, areas_for_improvement = analyze_resume(cv_text, job_description, api_key)
 
     out_dir = Path("evaluate_results")
     out_dir.mkdir(parents=True, exist_ok=True)

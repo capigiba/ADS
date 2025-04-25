@@ -113,43 +113,91 @@ def extract_skills_fuzzy(nlp: Language, text: str, skill_keywords: List[str], th
 
     return sorted(list(all_extracted))
 
-def parse_date(date_str: str) -> Optional[datetime]:
-    normalized_date_str = date_str.strip().lower()
-    present_terms = ["present", "current", "till date", "now", "ongoing"]
-    if normalized_date_str in present_terms:
-        return datetime.now()
+def parse_date(date_str: str, is_end_date: bool = False):
+    _current_time = datetime.now()
+    date_str = date_str.lower().strip()
+    if date_str in ['present', 'current', 'till date', 'now', 'ongoing']:
+        return (_current_time.year, _current_time.month) if is_end_date else None
 
     try:
-        parsed_dates = dateparser.search.search_dates(
-            date_str,
-            settings={'PREFER_MONTH_FIRST': False, 'PREFER_DATES_FROM': 'past', 'REQUIRE_PARTS': ['month', 'year']}
-        )
-        if parsed_dates:
-            return parsed_dates[0][1]
-        else:
-            direct_parse = dateparser.parse(date_str, settings={'PREFER_DATES_FROM': 'past'})
-            if direct_parse:
-                 if direct_parse.year and direct_parse.month:
-                     return direct_parse
-            return None
-    except Exception as e:
-        return None
+        month_name_local = r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z\.]{0,6}'
+        year_local = r'\b(?:19[89]\d|20\d{2})\b'
 
+        match = re.match(r'(' + month_name_local + r')\s+(' + year_local + r')', date_str, re.IGNORECASE)
+        if match:
+            month_str = match.group(1)[:3]
+            month_map = {name[:3]: i+1 for i, name in enumerate(['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])}
+            return (int(match.group(2).strip()), month_map[month_str])
 
-def calculate_months_difference(start_date: datetime, end_date: datetime) -> int:
-    if not start_date or not end_date or end_date < start_date:
+        match = re.match(r'(\d{1,2})\s?[/-]\s?(' + year_local + r')', date_str)
+        if match:
+            month = int(match.group(1))
+            if 1 <= month <= 12:
+                return (int(match.group(2).strip()), month)
+
+        match = re.match(r'(' + year_local + r')', date_str)
+        if match:
+            year_val = int(match.group(1).strip())
+            return (year_val, 12 if is_end_date else 1)
+
+    except Exception:
+        pass
+
+    return None
+
+def calculate_months_difference(start_date, end_date):
+    if not start_date or not end_date: return 0
+
+    start_year, start_month = start_date
+    end_year, end_month = end_date
+
+    if start_year > end_year or (start_year == end_year and start_month > end_month):
         return 0
-    year_diff = end_date.year - start_date.year
-    month_diff = end_date.month - start_date.month
-    total_months = (year_diff * 12) + month_diff + 1
-    return max(0, total_months)
+
+    return (end_year - start_year) * 12 + (end_month - start_month) + 1
 
 
 def extract_total_months_experience(text: str) -> int:
+    month_name = r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z\.]{0,6}'
+    year = r'\b(?:19[89]\d|20\d{2})\b'
+    month_year = rf'(?:{month_name}\s+{year}|\b\d{{1,2}}\s?[/-]\s?{year}\b)'
+    date_pattern = rf'(?:{month_year}|{year})'
+    end_date_present = r'(?:Present|Current|Till\s+Date|Now|Ongoing)'
+    end_date_pattern = rf'(?:{date_pattern}|{end_date_present})'
+    date_range_separator = r'\s*[-\u2013\u2014to]+\s*'
+
+    title_pattern = r'[A-Za-z][A-Za-z0-9\s\.,\-&\'\/]{3,90}'
+
     patterns = [
-        r'(?:^|\n)\s*(?P<title>[^\n(]+?)\s*(?:\n|\s+at\s+|\s*,\s*)(?:[^\n(]+?\s+)?\(?(?P<start_date>.{5,25}?)\s*[-\u2013\u2014to]+\s*(?P<end_date>.{4,25}?)\)?',
-        r'(?:^|\n)\s*(?P<title>[^\n(]{5,80}?)\s*(?:\n.*?){0,2}?\s*\(?(?P<start_date>.{5,25}?)\s*[-\u2013\u2014to]+\s*(?P<end_date>.{4,25}?)\)?',
-        r'(?P<start_date>(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Spr|Sum|Fal|Win)[a-z\.]{0,6}\s+\d{4}|\d{1,2}[/-]\d{4}|\d{4})\s*[-\u2013\u2014to]+\s*(?P<end_date>(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Spr|Sum|Fal|Win)[a-z\.]{0,6}\s+\d{4}|\d{1,2}[/-]\d{4}|\d{4}|Present|Current|Till Date|Now|Ongoing)',
+        rf"""
+            (?:^|\n)\s*
+            (?P<title>{title_pattern})
+            (?:\s*(?:at|,)\s*[^\n(]+?)?
+            \s*
+            \(?\s*
+            (?P<start_date>{date_pattern})
+            {date_range_separator}
+            (?P<end_date>{end_date_pattern})
+            \s*\)?
+        """,
+        rf"""
+            (?:^|\n)\s*
+            (?P<title>{title_pattern})
+            (?:\s*\n\s*[^\n(]{{2,80}})?
+            (?:\s*\n\s*)?
+            \(?\s*
+            (?P<start_date>{date_pattern})
+            {date_range_separator}
+            (?P<end_date>{end_date_pattern})
+            \s*\)?
+        """,
+        rf"""
+            (?:^|\n)\s*
+            (?P<start_date>{date_pattern})
+            {date_range_separator}
+            (?P<end_date>{end_date_pattern})
+            \b
+        """
     ]
 
     experiences = []
@@ -157,55 +205,51 @@ def extract_total_months_experience(text: str) -> int:
 
     text_cleaned = re.sub(r'(\d)\s+(\d)', r'\1\2', text)
 
-    for pattern in patterns:
+    for pattern_str in patterns:
         try:
-            for match in re.finditer(pattern, text_cleaned, re.IGNORECASE | re.MULTILINE):
+            for match in re.finditer(pattern_str, text_cleaned, re.IGNORECASE | re.MULTILINE | re.VERBOSE):
                 try:
                     start_str = match.group('start_date').strip()
                     end_str = match.group('end_date').strip()
+
                     date_span = (match.start('start_date'), match.end('end_date'))
 
                     if any(
-                        (date_span[0] >= found[0] and date_span[0] < found[1]) or
-                        (date_span[1] > found[0] and date_span[1] <= found[1]) or
-                        (found[0] >= date_span[0] and found[0] < date_span[1]) or
-                        (found[1] > date_span[0] and found[1] <= date_span[1])    
+                        (found[0] <= date_span[0] and found[1] >= date_span[1]) or
+                        (date_span[0] <= found[0] and date_span[1] >= found[1]) or
+                        (max(found[0], date_span[0]) < min(found[1], date_span[1]))
                         for found in found_spans
                     ):
                         continue
 
-                    start_date = parse_date(start_str)
-                    end_date = parse_date(end_str)
+                    start_date = parse_date(start_str, is_end_date=False)
+                    end_date = parse_date(end_str, is_end_date=True)
 
-                    title_check = match.groupdict().get('title', '').strip().lower()
-                    ignore_titles = ["experience", "work experience", "professional experience", "career summary", "employment", "history"]
-                    if title_check and (any(t in title_check for t in ignore_titles) or len(title_check) < 3):
-                         if not (start_date and end_date): continue
+                    if not (start_date and end_date):
+                        continue
 
-                    if start_date and end_date:
-                        months = calculate_months_difference(start_date, end_date)
-                        if months > 0:
-                            experiences.append({'start': start_date, 'end': end_date, 'months': months})
-                            found_spans.add(date_span)
+                    months = calculate_months_difference(start_date, end_date)
+                    if months > 0:
+                        experiences.append({
+                            'start': start_date,
+                            'end': end_date,
+                            'months': months,
+                            'span': date_span
+                        })
+                        found_spans.add(date_span)
 
                 except IndexError:
                     continue
-                except Exception as inner_e:
-                    print(f"Warning: Error processing experience match: {inner_e}", file=sys.stderr)
+                except Exception:
                     continue
 
-        except re.error as re_err:
-             print(f"Warning: Regex error in experience pattern: {re_err}", file=sys.stderr)
+        except re.error as e:
              continue
 
     if not experiences:
-        print("Info: No valid work experience periods found or parsed.")
         return 0
 
-    if len(experiences) <= 1:
-        return sum(exp['months'] for exp in experiences)
-
-    experiences.sort(key=lambda x: x['start'])
+    experiences.sort(key=lambda x: (x['start'], x['end']))
 
     merged = []
     if experiences:
@@ -213,6 +257,7 @@ def extract_total_months_experience(text: str) -> int:
 
         for i in range(1, len(experiences)):
             next_start, next_end = experiences[i]['start'], experiences[i]['end']
+
             if next_start <= current_end:
                 current_end = max(current_end, next_end)
             else:
@@ -222,6 +267,7 @@ def extract_total_months_experience(text: str) -> int:
         merged.append({'start': current_start, 'end': current_end})
 
     total_merged_months = sum(calculate_months_difference(period['start'], period['end']) for period in merged)
+
     return total_merged_months
 
 
@@ -264,12 +310,13 @@ def calculate_skill_score(skill_count: int) -> float:
         return max(0.0, (skill_count / TARGET_SKILLS) * WEIGHT_SKILL * USER_SKILL_WEIGHT)
     return 0.0
 
-def calculate_months_score(total_months: int) -> float:
+def calculate_months_score(total_months: int, score_jd: float) -> float:
+    factor = (score_jd / WEIGHT_JD)
     target = TARGET_MONTHS_EXPERIENCE
     if total_months >= target:
-        return WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT
+        return WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT * factor 
     elif target > 0:
-        return max(0.0, (total_months / target) * WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT)
+        return max(0.0, (total_months / target) * WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT * factor)
     return 0.0
 
 def calculate_word_score(word_count: int) -> float:
@@ -292,7 +339,7 @@ def calculate_final_score(jd_similarity: float, skill_count: int, total_months: 
                          word_count: int, gpa: Optional[float], details: Dict) -> float:
     score_jd = calculate_jd_score(jd_similarity)
     score_skill = calculate_skill_score(skill_count)
-    score_months = calculate_months_score(total_months)
+    score_months = calculate_months_score(total_months, score_jd)
     score_word = calculate_word_score(word_count)
     score_gpa = calculate_gpa_score(gpa)
 

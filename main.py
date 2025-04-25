@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(page_title="ADS Dashboard", layout="wide")
 
 from pages.upload_page import render_upload_section
 from pages.manage_page import render_manage_section
@@ -7,7 +8,6 @@ from pages.evaluate_results_page import render_evaluate_results_page
 from pages.skills_page import render_skills_page
 from pages.config_page import render_config
 
-st.set_page_config(page_title="ADS Dashboard", layout="wide")
 
 # initialize or read current page
 if "current_page" not in st.session_state:

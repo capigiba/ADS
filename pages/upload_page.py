@@ -9,6 +9,7 @@ import yaml
 from typing import Dict, List, Tuple
 from services.evaluate import evaluate_resume
 
+
 _config_path = Path(__file__).parent.parent / "config.yaml"
 _cfg = yaml.safe_load(_config_path.read_text())
 
@@ -16,6 +17,19 @@ USER_SKILL_WEIGHT            = _cfg["user_skill_weight"]
 USER_EXPERIENCE_WEIGHT       = _cfg["user_experience_weight"]
 
 def render_upload_section():
+    if "submitted" in st.session_state:
+        st.session_state.submitted = False
+    st.sidebar.title("🔑 Settings")
+    # Initialize if missing
+    if "api_key" not in st.session_state:
+        st.session_state.api_key = ""
+        
+    # Let user enter (hidden) key
+    st.session_state.api_key = st.sidebar.text_input(
+        "Gemini API Key", 
+        # type="password", 
+        value=st.session_state.api_key
+    )
     if "submitted" not in st.session_state:
         st.session_state.submitted = False
         st.session_state.filename = ""
@@ -95,7 +109,11 @@ def render_upload_section():
 
         submit = st.button("Submit")
         if submit:
-            if pdf_file is None:
+            st.session_state.submitted = False
+            # require key
+            if not st.session_state.api_key:
+                st.sidebar.error("Please enter your Gemini API Key in Settings → then rerun.")
+            elif pdf_file is None:
                 st.error("Please upload a PDF before submitting.")
             elif abs(total - 1.0) > 1e-6:
                 st.error("Cannot submit: please adjust weights so they sum to exactly 1.")
@@ -152,7 +170,8 @@ def render_upload_section():
 
                 cs, ks, ms, ai = evaluate_resume(
                     pdf_path=Path("folder_pdf") / st.session_state.filename,
-                    job_description=st.session_state.job_description
+                    job_description=st.session_state.job_description,
+                    api_key=st.session_state.api_key
                 )
                 st.session_state.results = {
                     "cs": cs,
