@@ -43,7 +43,7 @@ MAX_SCORE_WITH_GPA           = (
     + WEIGHT_WORD
     + WEIGHT_GPA
 )
-MAX_SCORE_WITHOUT_GPA        = MAX_SCORE_WITH_GPA - WEIGHT_GPA
+MAX_SCORE_WITHOUT_GPA = WEIGHT_JD + (WEIGHT_SKILL * USER_SKILL_WEIGHT) + (WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT) + WEIGHT_WORD
 
 FUZZY_TITLE_MATCH_THRESHOLD  = _cfg["fuzzy_title_match_threshold"]
 FUZZY_SKILL_MATCH_THRESHOLD  = _cfg["fuzzy_skill_match_threshold"]
@@ -559,6 +559,7 @@ def run_cv_scanner(
     # override the globals with what was passed in global USER_SKILL_WEIGHT, USER_EXPERIENCE_WEIGHT
     global USER_SKILL_WEIGHT, USER_EXPERIENCE_WEIGHT
     global TARGET_MONTHS_EXPERIENCE
+    global MAX_SCORE_WITH_GPA, MAX_SCORE_WITHOUT_GPA
 
     if user_skill_weight is not None:
         USER_SKILL_WEIGHT = user_skill_weight
@@ -566,6 +567,14 @@ def run_cv_scanner(
         USER_EXPERIENCE_WEIGHT = user_experience_weight
         # remember to recompute any targets that depend on it:
         TARGET_MONTHS_EXPERIENCE = _cfg["target_months_base"] * USER_EXPERIENCE_WEIGHT
+        MAX_SCORE_WITH_GPA           = (
+        WEIGHT_JD
+            + WEIGHT_SKILL * USER_SKILL_WEIGHT
+            + WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT
+            + WEIGHT_WORD
+            + WEIGHT_GPA
+        )
+        MAX_SCORE_WITHOUT_GPA = WEIGHT_JD + (WEIGHT_SKILL * USER_SKILL_WEIGHT) + (WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT) + WEIGHT_WORD
     # 1) load skills
     skills_map = load_skills()
 
