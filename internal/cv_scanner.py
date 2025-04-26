@@ -17,6 +17,7 @@ import dateparser
 from collections import defaultdict
 import yaml
 from utils.skill_utils import load_skills
+import streamlit as st
 
 _config_path = Path(__file__).parent.parent / "config.yaml"
 _cfg = yaml.safe_load(_config_path.read_text())
@@ -561,32 +562,42 @@ def run_cv_scanner(
     global TARGET_MONTHS_EXPERIENCE
     global MAX_SCORE_WITH_GPA, MAX_SCORE_WITHOUT_GPA
 
+    global USER_SKILL_WEIGHT, USER_EXPERIENCE_WEIGHT
+    global TARGET_MONTHS_EXPERIENCE, MAX_SCORE_WITH_GPA, MAX_SCORE_WITHOUT_GPA
+
+    # 1) override
     if user_skill_weight is not None:
         USER_SKILL_WEIGHT = user_skill_weight
     if user_experience_weight is not None:
         USER_EXPERIENCE_WEIGHT = user_experience_weight
-        # remember to recompute any targets that depend on it:
-        TARGET_MONTHS_EXPERIENCE = _cfg["target_months_base"] * USER_EXPERIENCE_WEIGHT
-        MAX_SCORE_WITH_GPA           = (
+
+    # 2) recompute everything that depends on those two
+    TARGET_MONTHS_EXPERIENCE = _cfg["target_months_base"] * USER_EXPERIENCE_WEIGHT
+
+    MAX_SCORE_WITH_GPA = (
         WEIGHT_JD
-            + WEIGHT_SKILL * USER_SKILL_WEIGHT
-            + WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT
-            + WEIGHT_WORD
-            + WEIGHT_GPA
-        )
-        MAX_SCORE_WITHOUT_GPA = WEIGHT_JD + (WEIGHT_SKILL * USER_SKILL_WEIGHT) + (WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT) + WEIGHT_WORD
+        + WEIGHT_SKILL * USER_SKILL_WEIGHT
+        + WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT
+        + WEIGHT_WORD
+        + WEIGHT_GPA
+    )
+    MAX_SCORE_WITHOUT_GPA = (
+        WEIGHT_JD
+        + WEIGHT_SKILL * USER_SKILL_WEIGHT
+        + WEIGHT_MONTHS * USER_EXPERIENCE_WEIGHT
+        + WEIGHT_WORD
+    )
     # 1) load skills
     skills_map = load_skills()
-
-    print("🛠️ Configuration after overrides:")
-    print(f"   • user_skill_weight  (param): {user_skill_weight!r}")
-    print(f"   • USER_SKILL_WEIGHT (global): {USER_SKILL_WEIGHT!r}")
-    print(f"   • user_experience_weight  (param): {user_experience_weight!r}")
-    print(f"   • USER_EXPERIENCE_WEIGHT (global): {USER_EXPERIENCE_WEIGHT!r}")
-    print(f"   • TARGET_MONTHS_EXPERIENCE    : {TARGET_MONTHS_EXPERIENCE!r}")
-    print(f"   • MAX_SCORE_WITH_GPA          : {MAX_SCORE_WITH_GPA!r}")
-    print(f"   • MAX_SCORE_WITHOUT_GPA       : {MAX_SCORE_WITHOUT_GPA!r}")
-    print("──────────────────────────────────\n")
+    st.info("🛠️ Configuration after overrides:")
+    st.info(f"   • user_skill_weight  (param): {user_skill_weight!r}")
+    st.info(f"   • USER_SKILL_WEIGHT (global): {USER_SKILL_WEIGHT!r}")
+    st.info(f"   • user_experience_weight  (param): {user_experience_weight!r}")
+    st.info(f"   • USER_EXPERIENCE_WEIGHT (global): {USER_EXPERIENCE_WEIGHT!r}")
+    st.info(f"   • TARGET_MONTHS_EXPERIENCE    : {TARGET_MONTHS_EXPERIENCE!r}")
+    st.info(f"   • MAX_SCORE_WITH_GPA          : {MAX_SCORE_WITH_GPA!r}")
+    st.info(f"   • MAX_SCORE_WITHOUT_GPA       : {MAX_SCORE_WITHOUT_GPA!r}")
+    st.info("──────────────────────────────────\n")
 
     # 2) validate job_description
     if not job_description or not job_description.strip():
