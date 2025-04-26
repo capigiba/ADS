@@ -357,7 +357,7 @@ def calculate_final_score(jd_similarity: float, skill_count: int, total_months: 
         'raw': raw_score, 'max': max_score
     }
 
-    st.info(details)
+    # st.info(details)
 
     return max(0.0, min(100.0, final_score))
 
@@ -484,7 +484,7 @@ class CVScanner:
         normalized_req_text = self.normalize_cv_text(req_text)
 
         for i, file_path in enumerate(file_paths):
-            st.info(f"\n--- Processing CV {i+1}/{len(file_paths)}: {file_path.name} ---")
+            # st.info(f"\n--- Processing CV {i+1}/{len(file_paths)}: {file_path.name} ---")
             cv_text_raw = self.extract_text_from_pdf(file_path)
 
             details = {
@@ -496,49 +496,49 @@ class CVScanner:
             }
 
             if not cv_text_raw:
-                st.info("Warning: Could not extract text from PDF. Assigning score 0.", file=sys.stderr)
+                # st.info("Warning: Could not extract text from PDF. Assigning score 0.", file=sys.stderr)
                 details['error'] = "PDF text extraction failed"
                 judgements[str(file_path)] = {'score': 0.0, **details}
                 continue
 
             normalized_cv_text = self.normalize_cv_text(cv_text_raw)
             if not normalized_cv_text:
-                st.info("Warning: Normalized CV text is empty. Assigning score 0.", file=sys.stderr)
+                # st.info("Warning: Normalized CV text is empty. Assigning score 0.", file=sys.stderr)
                 details['error'] = "CV text empty after normalization"
                 judgements[str(file_path)] = {'score': 0.0, **details}
                 continue
 
-            st.info("Calculating JD similarity...")
+            # st.info("Calculating JD similarity...")
             jd_similarity = self.calculate_similarity(normalized_req_text, normalized_cv_text)
             details['jd_similarity'] = jd_similarity
-            st.info(f"JD Similarity: {jd_similarity:.3f}")
+            # st.info(f"JD Similarity: {jd_similarity:.3f}")
 
-            st.info(f"Extracting skills (using {len(relevant_skills)} target skills)...")
-            st.info(f"[cv_text_raw]: {cv_text_raw}")
-            st.info(f"[relevant_skills]:  {relevant_skills}")
+            # st.info(f"Extracting skills (using {len(relevant_skills)} target skills)...")
+            # st.info(f"[cv_text_raw]: {cv_text_raw}")
+            # st.info(f"[relevant_skills]:  {relevant_skills}")
             matched_skills = extract_skills_fuzzy(self.nlp, cv_text_raw, relevant_skills)
             details['matched_skills_list'] = matched_skills
             details['matched_skills_count'] = len(matched_skills)
-            st.info(f"Matched Skills ({len(matched_skills)}): {', '.join(matched_skills) if matched_skills else 'None'}")
+            # st.info(f"Matched Skills ({len(matched_skills)}): {', '.join(matched_skills) if matched_skills else 'None'}")
 
-            st.info("Calculating total months experience...")
+            # st.info("Calculating total months experience...")
             total_months = extract_total_months_experience(cv_text_raw)
             details['total_months_experience'] = total_months
-            st.info(f"Total Experience: {total_months} months")
+            # st.info(f"Total Experience: {total_months} months")
 
             word_count = extract_word_count(normalized_cv_text)
             details['word_count'] = word_count
-            st.info(f"Word Count: {word_count}")
+            # st.info(f"Word Count: {word_count}")
 
-            st.info("Extracting GPA...")
+            # st.info("Extracting GPA...")
             gpa = extract_gpa(cv_text_raw)
             details['gpa'] = gpa
-            st.info(f"GPA: {gpa if gpa is not None else 'Not Found'}")
+            # st.info(f"GPA: {gpa if gpa is not None else 'Not Found'}")
 
-            st.info("Calculating final score...")
+            # st.info("Calculating final score...")
             final_score = calculate_final_score(jd_similarity, len(matched_skills), total_months, word_count, gpa, details)
             details['score'] = final_score
-            st.info(f"--- Final Score for {file_path.name}: {final_score:.2f} ---")
+            # st.info(f"--- Final Score for {file_path.name}: {final_score:.2f} ---")
 
             judgements[str(file_path)] = details
 
@@ -594,15 +594,15 @@ def run_cv_scanner(
     )
     # 1) load skills
     skills_map = load_skills()
-    st.info("🛠️ Configuration after overrides:")
-    st.info(f"   • user_skill_weight  (param): {user_skill_weight!r}")
-    st.info(f"   • USER_SKILL_WEIGHT (global): {USER_SKILL_WEIGHT!r}")
-    st.info(f"   • user_experience_weight  (param): {user_experience_weight!r}")
-    st.info(f"   • USER_EXPERIENCE_WEIGHT (global): {USER_EXPERIENCE_WEIGHT!r}")
-    st.info(f"   • TARGET_MONTHS_EXPERIENCE    : {TARGET_MONTHS_EXPERIENCE!r}")
-    st.info(f"   • MAX_SCORE_WITH_GPA          : {MAX_SCORE_WITH_GPA!r}")
-    st.info(f"   • MAX_SCORE_WITHOUT_GPA       : {MAX_SCORE_WITHOUT_GPA!r}")
-    st.info("──────────────────────────────────\n")
+    # st.info("🛠️ Configuration after overrides:")
+    # st.info(f"   • user_skill_weight  (param): {user_skill_weight!r}")
+    # st.info(f"   • USER_SKILL_WEIGHT (global): {USER_SKILL_WEIGHT!r}")
+    # st.info(f"   • user_experience_weight  (param): {user_experience_weight!r}")
+    # st.info(f"   • USER_EXPERIENCE_WEIGHT (global): {USER_EXPERIENCE_WEIGHT!r}")
+    # st.info(f"   • TARGET_MONTHS_EXPERIENCE    : {TARGET_MONTHS_EXPERIENCE!r}")
+    # st.info(f"   • MAX_SCORE_WITH_GPA          : {MAX_SCORE_WITH_GPA!r}")
+    # st.info(f"   • MAX_SCORE_WITHOUT_GPA       : {MAX_SCORE_WITHOUT_GPA!r}")
+    # st.info("──────────────────────────────────\n")
 
     # 2) validate job_description
     if not job_description or not job_description.strip():
