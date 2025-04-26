@@ -513,8 +513,8 @@ class CVScanner:
             st.info(f"JD Similarity: {jd_similarity:.3f}")
 
             st.info(f"Extracting skills (using {len(relevant_skills)} target skills)...")
-            st.info(f"cv_text_raw", cv_text_raw)
-            st.info(f"relevant_skills", relevant_skills)
+            st.info(f"[cv_text_raw]: {cv_text_raw}")
+            st.info(f"[relevant_skills]:  {relevant_skills}")
             matched_skills = extract_skills_fuzzy(self.nlp, cv_text_raw, relevant_skills)
             details['matched_skills_list'] = matched_skills
             details['matched_skills_count'] = len(matched_skills)
