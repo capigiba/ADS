@@ -578,8 +578,15 @@ def run_cv_scanner(
     # 1) load skills
     skills_map = load_skills()
 
-    print(f"[LOG] USER_SKILL_WEIGHT: {USER_SKILL_WEIGHT}")
-    print(f"[LOG] USER_EXPERIENCE_WEIGHT: {USER_EXPERIENCE_WEIGHT}")
+    print("🛠️ Configuration after overrides:")
+    print(f"   • user_skill_weight  (param): {user_skill_weight!r}")
+    print(f"   • USER_SKILL_WEIGHT (global): {USER_SKILL_WEIGHT!r}")
+    print(f"   • user_experience_weight  (param): {user_experience_weight!r}")
+    print(f"   • USER_EXPERIENCE_WEIGHT (global): {USER_EXPERIENCE_WEIGHT!r}")
+    print(f"   • TARGET_MONTHS_EXPERIENCE    : {TARGET_MONTHS_EXPERIENCE!r}")
+    print(f"   • MAX_SCORE_WITH_GPA          : {MAX_SCORE_WITH_GPA!r}")
+    print(f"   • MAX_SCORE_WITHOUT_GPA       : {MAX_SCORE_WITHOUT_GPA!r}")
+    print("──────────────────────────────────\n")
 
     # 2) validate job_description
     if not job_description or not job_description.strip():
