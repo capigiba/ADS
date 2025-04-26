@@ -91,29 +91,29 @@ def extract_job_title_from_requirement(req_text: str) -> Optional[str]:
     print("Warning: Could not confidently extract job title from requirement.", file=sys.stderr)
     return None
 
-def extract_skills_fuzzy(nlp: Language, text: str, skill_keywords: List[str], threshold: int = FUZZY_SKILL_MATCH_THRESHOLD) -> List[str]:
-    text = text.lower()
-    if not skill_keywords or not text:
-        return []
+def extract_skills_fuzzy(nlp, text, skill_keywords, threshold=80):
+    text_norm = normalize_text(text.lower())
 
-    doc: Doc = nlp(text.lower())
-    lemmas = {token.lemma_ for token in doc if token.is_alpha and not token.is_stop and not token.is_punct}
+    # 1) Collect single‐word lemmas as before
+    doc = nlp(text_norm)
+    lemmas = {tok.lemma_ for tok in doc if tok.is_alpha and not tok.is_stop}
+    skills_exact = []
+    for kw in skill_keywords:
+        norm_kw = normalize_text(kw)
+        if norm_kw in lemmas:
+            skills_exact.append(norm_kw)
 
-    normalized_skill_keywords = {normalize_text(kw) for kw in skill_keywords}
+    # 2) Fuzzy‐match each remaining keyword
+    skills_fuzzy = []
+    for kw in skill_keywords:
+        norm_kw = normalize_text(kw)
+        if norm_kw in skills_exact:
+            continue
+        score = fuzz.partial_ratio(norm_kw, text_norm)
+        if score >= threshold:
+            skills_fuzzy.append(norm_kw)
 
-    extracted_skills_lemma = lemmas.intersection(normalized_skill_keywords)
-
-    text_lower = normalize_text(text)
-    extracted_skills_fuzzy = set()
-    potential_fuzzy_matches = list(normalized_skill_keywords - extracted_skills_lemma)
-    if potential_fuzzy_matches:
-        limit_fuzzy = min(len(potential_fuzzy_matches) * 2, 500)
-        fuzzy_results = process.extract(text_lower, potential_fuzzy_matches, scorer=fuzz.token_sort_ratio, limit=limit_fuzzy)
-        extracted_skills_fuzzy.update(keyword for keyword, score in fuzzy_results if score >= threshold)
-
-    all_extracted = extracted_skills_lemma.union(extracted_skills_fuzzy)
-
-    return sorted(list(all_extracted))
+    return sorted(set(skills_exact + skills_fuzzy))
 
 def parse_date(date_str: str, is_end_date: bool = False):
     _current_time = datetime.now()
