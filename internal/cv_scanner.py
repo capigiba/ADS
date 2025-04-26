@@ -92,6 +92,7 @@ def extract_job_title_from_requirement(req_text: str) -> Optional[str]:
     return None
 
 def extract_skills_fuzzy(nlp: Language, text: str, skill_keywords: List[str], threshold: int = FUZZY_SKILL_MATCH_THRESHOLD) -> List[str]:
+    text = text.lower()
     if not skill_keywords or not text:
         return []
 
