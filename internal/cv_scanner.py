@@ -356,6 +356,8 @@ def calculate_final_score(jd_similarity: float, skill_count: int, total_months: 
         'raw': raw_score, 'max': max_score
     }
 
+    st.info(details)
+
     return max(0.0, min(100.0, final_score))
 
 class CVScanner:
