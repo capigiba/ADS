@@ -110,7 +110,7 @@ def render_config():
             default = load_config(BACKUP_PATH)
             save_config(CONFIG_PATH, default)
             st.success("Configuration reset to default settings")
-            st.experimental_rerun()  # reload page to reflect defaults
+            st.rerun()  # reload page to reflect defaults
 
 if __name__ == "__main__":
     render_config()

@@ -186,22 +186,14 @@ def render_upload_section():
         if st.session_state.submitted:
             st.subheader("ATS Score")
             with st.spinner("🔄 Scanning CV, please wait…"):
-                if st.session_state.custom_weights:
-                    score, result_file = scan_record_score(
-                        filename=st.session_state.filename,
-                        job_title=st.session_state.job_title,
-                        job_description=st.session_state.job_description,
-                        score_all=st.session_state.score_all,
-                        user_skill_weight=st.session_state.weight1,
-                        user_experience_weight=st.session_state.weight2,
-                    )
-                else:
-                    score, result_file = scan_record_score(
-                        filename=st.session_state.filename,
-                        job_title=st.session_state.job_title,
-                        job_description=st.session_state.job_description,
-                        score_all=st.session_state.score_all
-                    )
+                score, result_file = scan_record_score(
+                    filename=st.session_state.filename,
+                    job_title=st.session_state.job_title,
+                    job_description=st.session_state.job_description,
+                    score_all=st.session_state.score_all,
+                    user_skill_weight=st.session_state.weight1,
+                    user_experience_weight=st.session_state.weight2,
+                )
             st.success("✅ Scan complete!")
             render_ats_gauge(score)
 
