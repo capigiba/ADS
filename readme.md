@@ -1,6 +1,14 @@
 # ADS App
 
-A simple Streamlit application for managing PDF job descriptions. Upload PDFs, configure job metadata, and manage records with soft-delete functionality.
+## Introduction
+
+ADS Dashboard is a Streamlit-powered, an application that lets hiring teams upload and securely store PDF resumes, configure custom skill-vs-experience weightings, and instantly generate ATS-style scores alongside rich, per-candidate analyses (keyword matches, fuzzy skill detection, experience summaries, word counts and more). Its intuitive sidebar navigation also provides quick access to historical scan results, detailed evaluation reports, resume management (view, download or delete), a centralized skill library for each job title, and advanced configuration settings—everything you need to streamline, standardize and scale your CV screening process.
+
+Link demo: [ADS app](https://capigiba.streamlit.app/)
+
+![alt text](demo/dashboard.png)
+
+![alt text](demo/result.png)
 
 ## Prerequisites
 
@@ -13,11 +21,11 @@ A simple Streamlit application for managing PDF job descriptions. Upload PDFs, c
 1. **Clone the repository** (if using Git):
    ```bash
    git clone <repository_url>
-   cd test
+   cd folder
    ```
    If you already have the project files locally, simply `cd` into the project folder:
    ```bash
-   cd /path/to/test
+   cd /path/to/folder
    ```
 
 2. **Create and activate a virtual environment**:
